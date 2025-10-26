@@ -83,9 +83,9 @@ export interface PSU extends BasePart {
     }
 }
 
-export interface Monitor extends BasePart {}
-export interface Keyboard extends BasePart {}
-export interface Mouse extends BasePart {}
+export type Monitor = BasePart
+export type Keyboard = BasePart
+export type Mouse = BasePart
 
 
 export interface SelectedParts {

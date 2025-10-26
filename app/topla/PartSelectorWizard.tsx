@@ -12,6 +12,7 @@ import {
   Keyboard,
   Mouse,
   SelectedParts,
+  BasePart,
 } from "@/app/types/parts";
 
 import rawCpus from "@/data/islemci.json";
@@ -25,7 +26,7 @@ import rawPsus from "@/data/psu.json";
 import rawMonitors from "@/data/monitor.json";
 import rawKeyboards from "@/data/klavye.json";
 import rawMice from "@/data/fare.json";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useCallback } from "react";
 
 export const cpusData = rawCpus as CPU[];
 export const motherboardsData = rawMotherboards as Motherboard[];
@@ -74,7 +75,7 @@ export default function PartSelectorWizard() {
   const currentStep = steps[currentStepIndex];
 
   // Uyumluluk yardımcıları
-  function filterForStep(step: Step) {
+  const filterForStep = useCallback((step: Step): BasePart[] => {
     switch (step) {
       case "motherboard":
         return motherboardsData;
@@ -189,17 +190,14 @@ export default function PartSelectorWizard() {
       case "mouse":
         return miceData;
       default:
-        return [] as any;
+        return [];
     }
-  }
+  }, [selected]);
 
-  const available = useMemo(
-    () => filterForStep(currentStep),
-    [currentStep, selected]
-  );
+  const available = useMemo(() => filterForStep(currentStep), [currentStep, filterForStep]);
 
-  function selectPart(step: Step, part: any | null) {
-    setSelected((prev) => ({ ...prev, [step]: part }));
+  function selectPart<S extends Step>(step: S, part: SelectedParts[S] | null) {
+    setSelected((prev) => ({ ...prev, [step]: part } as SelectedParts));
   }
 
   function next() {
@@ -320,9 +318,8 @@ export default function PartSelectorWizard() {
                   </div>
                 ) : (
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {available.map((p: any) => {
-                      const isSelected =
-                        (selected as any)[currentStep]?.id === p.id;
+                    {available.map((p) => {
+                      const isSelected = selected[currentStep]?.id === p.id;
                       const outOfStock = p.stok?.durum !== "in_stock";
                       return (
                         <div
@@ -366,17 +363,8 @@ export default function PartSelectorWizard() {
                                 outOfStock ? "text-gray-400" : "text-gray-900"
                               }`}
                             >
-                              {p.ad || `${p.marka || ""} ${p.model || ""}`}
+                              {p.ad}
                             </h3>
-                            {p.marka && (
-                              <p
-                                className={`text-xs ${
-                                  outOfStock ? "text-gray-300" : "text-gray-500"
-                                }`}
-                              >
-                                {p.marka}
-                              </p>
-                            )}
                           </div>
                           <div className="flex items-end justify-between">
                             <div
@@ -421,7 +409,7 @@ export default function PartSelectorWizard() {
                 </button>
 
                 <div className="text-sm text-gray-600">
-                  {(selected as any)[currentStep] ? (
+                  {selected[currentStep] ? (
                     <span className="text-green-600 font-medium">
                       ✓ Seçildi
                     </span>
@@ -453,7 +441,7 @@ export default function PartSelectorWizard() {
               <div className="p-4 max-h-[500px] overflow-y-auto">
                 <div className="space-y-3">
                   {steps.map((step) => {
-                    const part = (selected as any)[step];
+                    const part = selected[step];
                     const isPast = steps.indexOf(step) < currentStepIndex;
                     const isCurrent = step === currentStep;
 
@@ -480,7 +468,7 @@ export default function PartSelectorWizard() {
                         {part ? (
                           <>
                             <div className="text-sm font-medium text-gray-900 line-clamp-2">
-                              {part.ad || part.model}
+                              {part.ad}
                             </div>
                             <div className="text-xs font-bold text-blue-600 mt-1">
                               {part.fiyat_try?.toLocaleString("tr-TR")} ₺
