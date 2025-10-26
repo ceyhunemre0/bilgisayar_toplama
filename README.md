@@ -1,5 +1,7 @@
 ## Bilgisayar Toplama (PC Builder)
 
+https://bilgisayar-toplama.vercel.app
+
 Modern bir Next.js (App Router) projesi ile adım adım bilgisayar toplama sihirbazı. Anakart → İşlemci → RAM → GPU → Soğutucu → Depolama → Kasa → PSU → Monitör → Klavye → Fare sıralamasıyla ilerler, uyumluluk kurallarına göre seçenekleri sunar ve toplam fiyatı hesaplar.
 
 Öne çıkanlar:
